@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    tty: true
+    ports:
+      - 8080:8080
+    env_file:
+      - ./db/.env
+    depends_on:
+      - db
+    volumes:
+      - type: bind
+        source: ./api/
+        target: /go/src
+
+  db:
+    container_name: db
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    tty: true
+    platform: linux/x86_64
+    env_file:
+      - ./db/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: test_database
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: password
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db/initsql:/docker-entrypoint-initdb.d
+
+volumes:
+  db-store:
